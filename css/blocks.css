@@ -1,0 +1,93 @@
+.mapTrouveTout .button,.mapTrouveTout .result-distance {
+	margin: 10px;
+	padding: 5px;
+	position: absolute;
+	background-color: white;
+	border: 2px solid black;
+	border-radius:15px;
+	moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+}
+
+.mapTrouveTout .button {
+	cursor: pointer;
+}
+
+.mapTrouveTout .full {
+	width: 100%;
+	height: 100%;
+}
+
+.mapTrouveTout .panorama {
+	-webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.mapTrouveTout .guess-pane-wrapper {
+	width: 400px;
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	z-index: 2;
+	background-color: white;
+	border: 1px solid black;
+}
+
+.mapTrouveTout .guess-pane-wrapper .swimmer {
+	z-index: 3;
+}
+
+.mapTrouveTout .guess-pane-wrapper .tirette {
+	position: absolute;
+	height: 25px;
+	bottom: -30px;
+	width: 100%;
+	background-color: white;
+	cursor: row-resize;
+	border : 1px black solid;
+	padding-left: 3px;
+	padding-right : 3px;
+}
+
+.mapTrouveTout .guess-pane-wrapper .guess-pane {
+	width: 100%;
+	height: 400px;
+}
+
+.mapTrouveTout .guess-pane-wrapper .guess-pane .go-guess {
+	bottom: 10px;
+}
+
+.mapTrouveTout .result-wrapper {
+	border: 10px solid black;
+	height: 80%;
+	left: 10%;
+	position: absolute;
+	top: 10%;
+	width: 80%;
+	z-index: 5;
+	display: none;
+}
+#disabledAtTheMoment_ADEL .mapTrouveTout .result-wrapper {
+	height: 100%;
+	left: 0%;
+	position: absolute;
+	top: 0%;
+	width: 100%;
+	z-index: 5;
+	display: none;
+}
+
+.mapTrouveTout .result-map .swimmer {
+	z-index: 7;
+}
+
+.mapTrouveTout .result-distance,.mapTrouveTout .result-continue {
+	bottom: 10px;
+}
+
+.mapTrouveTout .result-wrapper .result-continue {
+	right: 10px;
+}
