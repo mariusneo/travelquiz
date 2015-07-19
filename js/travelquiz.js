@@ -304,7 +304,7 @@
 					actualSolution, playerProposition);
 
 			pageDomHandler.getResultLabel().html(
-					Math.floor(dist) / 1000 + " km");
+					Math.floor(Math.floor(dist) / 1000) + " km");
 
 			
 			if(window["coordinateWizzardIncluded"]){
