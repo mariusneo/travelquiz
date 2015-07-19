@@ -47,6 +47,7 @@
 		var $showResultMapNode;
 		var $showResultDistanceNode;
 		var $continueNode;
+		var $coverNode;
 
 		this.init = (function($elem) { // $elem : pageDomHandler.getPanorama()
 
@@ -91,6 +92,8 @@
 
 			$guessPaneWrapper = makeClassedNode("div", "", "guess-pane-wrapper");
 
+			$coverNode = makeClassedNode("div", "", "cover");
+
 			$guessPaneTirette = makeClassedNode("div", "Hide / Show", "tirette");
 
 			$guessPaneNode = makeClassedNode("div", "", "guess-pane");
@@ -114,6 +117,7 @@
 		}
 
 		function linkNodes() {
+			$panoramaNode.append($coverNode);
 			$playingGeneralArea.append($panoramaNode);
 			$playingGeneralArea.append($guessPaneWrapper);
 			$playingGeneralArea.append($showResultMapWrapper);
@@ -152,12 +156,10 @@
 	function PanoramaHandler() {
 		var self = this;
 
-        var panoramaElement;
 		var startPos;
 		var currentIndex = 0;
 
 		this.init = (function($elem) {
-		    panoramaElement = $elem.get(0);
 		    makeStartPosition();
 		});
 
@@ -181,7 +183,14 @@
             currentIndex = (currentIndex+1) % coordList.length;
 
             startPos = new google.maps.LatLng(coord.lat,coord.lng);
-            panoramaElement.style.backgroundImage ="url('"+coord.image+"')";
+
+			$('.cover').show();
+
+            $('.panorama')
+            .css('background-image',"url('"+coord.image+"')")
+            .waitForImages(function() {
+            	$('.cover').fadeOut(500);
+              }, $.noop, true);
         }
 
         // /End/ PRIVATE
