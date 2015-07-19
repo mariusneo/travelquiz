@@ -189,7 +189,7 @@
             $('.panorama')
             .css('background-image',"url('"+coord.image+"')")
             .waitForImages(function() {
-            	$('.cover').fadeOut(500);
+            	$('.cover').hide();
               }, $.noop, true);
         }
 

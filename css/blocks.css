@@ -47,8 +47,6 @@
 	background-color: white;
 	cursor: row-resize;
 	border : 1px black solid;
-	padding-left: 3px;
-	padding-right : 3px;
 }
 
 .mapTrouveTout .guess-pane-wrapper .guess-pane {
@@ -94,9 +92,12 @@
 
 
 .cover {
-    background: url("../img/spinner/spinner.gif") no-repeat scroll center center #FFF;
+    background: url("../img/spinner/Preloader_41.gif") no-repeat scroll center center #FFF;
     opacity : 0.7;
     position: absolute;
-    height: 100%;
-    width: 100%;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index : 999;
 }
