@@ -54,7 +54,7 @@
 
 			linkNodes();
 
-			interationSetup();
+			interactionSetup();
 		});
 
 		self.getPanorama = (function() {
@@ -130,7 +130,7 @@
 		}
 
 
-		function interationSetup() {
+		function interactionSetup() {
 
 			$guessPaneTirette.click(function() {
 				$guessPaneNode.slideToggle();
@@ -179,7 +179,6 @@
 
             var coord = coordList[currentIndex];
             currentIndex = (currentIndex+1) % coordList.length;
-            console.log(coord);
 
             startPos = new google.maps.LatLng(coord.lat,coord.lng);
             panoramaElement.style.backgroundImage ="url('"+coord.image+"')";
