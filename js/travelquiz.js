@@ -157,7 +157,6 @@
 		var self = this;
 
 		var startPos;
-		var currentIndex = 0;
 
 		this.init = (function($elem) {
 		    makeStartPosition();
@@ -179,8 +178,7 @@
         function makeStartPosition() {
             var coordList = getCoordList();
 
-            var coord = coordList[currentIndex];
-            currentIndex = (currentIndex+1) % coordList.length;
+            var coord = coordList[Math.floor(Math.random()*coordList.length)];
 
             startPos = new google.maps.LatLng(coord.lat,coord.lng);
 
