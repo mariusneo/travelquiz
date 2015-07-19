@@ -93,7 +93,7 @@
 
 .cover {
     background: url("../img/spinner/Preloader_41.gif") no-repeat scroll center center #FFF;
-    opacity : 0.7;
+    opacity : 0.5;
     position: absolute;
     left: 0;
     top: 0;
