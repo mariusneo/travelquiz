@@ -13,3 +13,5 @@ repository.
 
 In order to change the images with your own, remove the content of ```img/photos``` directory and adapt the content 
 of the file ```js/coordinates.js``` (which contains the image metadata).
+
+Demo is available here [http://mariusneo.github.io/travelquiz/](http://mariusneo.github.io/travelquiz/).
