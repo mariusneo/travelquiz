@@ -5,7 +5,7 @@ Travel Quiz Local Installation Instructions
 In order to install locally the travelquiz web application, once the directory travelquiz is on your computer,
 please perform the following steps :
 
-- place the images that you want to browse through the travel quiz within the directory travelquiz/photos
+- place the images that you want to browse through the travel quiz within the directory travelquiz/img/photos
 
 - construct an Excel file with the following columns :
     - image
