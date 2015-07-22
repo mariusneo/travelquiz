@@ -185,7 +185,7 @@
 			$('.cover').show();
 
             $('.panorama')
-            .css('background-image',"url('"+coord.image+"')")
+            .css('background-image',"url('img/photos/"+coord.image+"')")
             .waitForImages(function() {
             	$('.cover').hide();
               }, $.noop, true);
