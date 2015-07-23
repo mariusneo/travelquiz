@@ -63,7 +63,13 @@
 <textarea xmlns="http://www.w3.org/1999/xhtml"  id="out"
           style="width:700px;height:300px;"
           placeholder="Preview of the generated coordinates.js file"></textarea>
-<br />
+<br /><br /><br />
+<textarea xmlns="http://www.w3.org/1999/xhtml"  id="warnings"
+		  style="width:700px;height:150px;"
+		  placeholder="Warnings that occur during the generation of the coordinates.js file"></textarea>
+<input type="button" id="reset" value="Reset" onclick="reset();">
+
+
 <!-- uncomment the next line here and in xlsxworker.js for encoding support -->
 <!--<script src="dist/cpexcel.js"></script>-->
 <script src="js/js-xlsx/shim.js"></script>
@@ -89,7 +95,9 @@ if(!rABS) {
 	document.getElementsByName("userabs")[0].checked = false;
 }
 
-var use_worker = typeof Worker !== 'undefined';
+// Workers can't be used when running the html locally on Chrome browser.
+//var use_worker = typeof Worker !== 'undefined';
+var use_worker = false;
 if(!use_worker) {
 	document.getElementsByName("useworker")[0].disabled = true;
 	document.getElementsByName("useworker")[0].checked = false;
@@ -142,7 +150,7 @@ function xw_xfer(data, cb) {
 		switch(e.data.t) {
 			case 'ready': break;
 			case 'e': console.error(e.data.d); break;
-			default: xx=ab2str(e.data).replace(/\n/g,"\\n").replace(/\r/g,"\\r"); console.log("done"); cb(JSON.parse(xx)); break;
+			default: xx=ab2str(e.data).replace(/\n/g,"\\n").replace(/\r/g,"\\r"); cb(JSON.parse(xx)); break;
 		}
 	};
 	if(rABS) {
@@ -168,25 +176,42 @@ function get_radio_value( radioName ) {
 	}
 }
 
-function to_json(workbook) {
+function reset(){
+	warnings.value = "";
+	out.value="";
+}
+
+function to_json(workbook, warnings_callback) {
     // export the content of the first worksheet to JSON
 	var result = X.utils.sheet_to_row_object_array(workbook.Sheets[workbook.SheetNames[0]], {'raw':true});
     result.forEach(function(entry) {
+    	// check if the image filename is correctly referenced in img/photos directory.
+		var img = new Image();
+		img.src = "img/photos/"+entry.image;
+		img.onerror = function(){warnings_callback("Image '" + entry.image + "' could not be found in img/photos/ directory");}
+
         entry.lat = Number(entry.lat);
+        if (entry.lat < -90 || entry.lat > 90) warnings_callback("Image '" + entry.image + "' has the latitude " +
+        	entry.lat +" out of the interval [-90, 90]");
         entry.lng = Number(entry.lng);
+        if (entry.lng < -180 || entry.lng > 180) warnings_callback("Image '" + entry.image + "' has the longitude " +
+        	entry.lng +" out of the interval [-180, 180]");
     });
 	return result;
 }
 
 
 function process_wb(wb) {
+	var warnings_callback = function(warnContent){
+		warnings.value += warnContent + "\n";
+	};
+
 	var output ='(function() {\n'+
     '    window.getCoordList = function() {\n'+
-    '        return ' + JSON.stringify(to_json(wb), 2, 2)+ ';\n'+
+    '        return ' + JSON.stringify(to_json(wb, warnings_callback), 2, 2)+ ';\n'+
     '    };\n'+
     '})();';
-	if(out.innerText === undefined) out.textContent = output;
-	else out.innerText = output;
+	out.value = output;
 	var coordinatesBlob = new Blob([output], {type: "text/plain;charset=utf-8"});
     saveAs(coordinatesBlob, "coordinates.js");
 }
