@@ -1,19 +1,38 @@
 <!DOCTYPE html>
-<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Travel Quiz Coordinates Generator</title>
     <style>
         #drop{
-        border:2px dashed #bbb;
-        -moz-border-radius:5px;
-        -webkit-border-radius:5px;
-        border-radius:5px;
-        padding:25px;
-        text-align:center;
-        font:20pt bold,"Vollkorn";color:#bbb
+			border:2px dashed #bbb;
+			-moz-border-radius:5px;
+			-webkit-border-radius:5px;
+			border-radius:5px;
+			padding:25px;
+			text-align:center;
+			font:20pt bold,"Vollkorn";color:#bbb
         }
+
+		.clearfix:after {
+			visibility: hidden;
+			display: block;
+			font-size: 0;
+			content: " ";
+			clear: both;
+			height: 0;
+		}
+		.clearfix {
+			display: inline-block;
+		}
+		/* start commented backslash hack \*/
+		* html .clearfix {
+			height: 1%;
+		}
+		.clearfix {
+			display: block;
+		}
     </style>
+	<link rel="stylesheet" href="css/jpaginate.css" />
 </head>
 <h1>Travel Quiz Coordinates Generator</h1><br />
 
@@ -48,8 +67,8 @@
     </tbody>
 </table>
 
-<p>The description column in the table above is optional and does not necessarily need to be filled.</p>
-<p>It is recommended not to leave empty lines between the rows that are filled in order to ]
+<p>The description column in the table above is optional and does not necessarily need to be filled.
+It is recommended not to leave empty lines between the rows that are filled in order to ]
     avoid problems when parsing the Excel file.</p>
 
 <div id="drop">Drop the coordinates.xls file here</div>
@@ -60,14 +79,25 @@
 <input type="checkbox" style="display:none" name="useworker" checked><br />
 <input type="checkbox" style="display:none" name="xferable" checked><br />
 <input type="checkbox" style="display:none" name="userabs" checked><br />
+
+<input type="button" id="reset" value="Reset" onclick="reset();"><br /><br/>
 <textarea xmlns="http://www.w3.org/1999/xhtml"  id="out"
-          style="width:700px;height:300px;"
+          style="width:700px;height:150px; margin-right:50px"
+		  readonly
           placeholder="Preview of the generated coordinates.js file"></textarea>
-<br /><br /><br />
 <textarea xmlns="http://www.w3.org/1999/xhtml"  id="warnings"
 		  style="width:700px;height:150px;"
+		  readonly
 		  placeholder="Warnings that occur during the generation of the coordinates.js file"></textarea>
-<input type="button" id="reset" value="Reset" onclick="reset();">
+
+
+<div id="preview" style="display:none">
+	<h1>Preview</h1>
+	<div id="preview-container"></div>
+	<div id="pager">
+	</div>
+</div>
+
 
 
 <!-- uncomment the next line here and in xlsxworker.js for encoding support -->
@@ -77,223 +107,9 @@
 <script src="js/js-xlsx/xlsx.js"></script>
 <script src="js/js-xlsx/ods.js"></script>
 <script src="js/jquery-1.11.1.js"></script>
+<script src="js/jquery.paginate.js"></script>
 <script src="js/filesaver/FileSaver.js"></script>
-<script>
-var X = XLSX;
-var XW = {
-	/* worker message */
-	msg: 'xlsx',
-	/* worker scripts */
-	rABS: 'js/js-xlsx/xlsxworker2.js',
-	norABS: 'js/js-xlsx/xlsxworker1.js',
-	noxfer: 'js/js-xlsx/xlsxworker.js'
-};
-
-var rABS = typeof FileReader !== "undefined" && typeof FileReader.prototype !== "undefined" && typeof FileReader.prototype.readAsBinaryString !== "undefined";
-if(!rABS) {
-	document.getElementsByName("userabs")[0].disabled = true;
-	document.getElementsByName("userabs")[0].checked = false;
-}
-
-// Workers can't be used when running the html locally on Chrome browser.
-//var use_worker = typeof Worker !== 'undefined';
-var use_worker = false;
-if(!use_worker) {
-	document.getElementsByName("useworker")[0].disabled = true;
-	document.getElementsByName("useworker")[0].checked = false;
-}
-
-var transferable = use_worker;
-if(!transferable) {
-	document.getElementsByName("xferable")[0].disabled = true;
-	document.getElementsByName("xferable")[0].checked = false;
-}
-
-var wtf_mode = false;
-
-function fixdata(data) {
-	var o = "", l = 0, w = 10240;
-	for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint8Array(data.slice(l*w,l*w+w)));
-	o+=String.fromCharCode.apply(null, new Uint8Array(data.slice(l*w)));
-	return o;
-}
-
-function ab2str(data) {
-	var o = "", l = 0, w = 10240;
-	for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint16Array(data.slice(l*w,l*w+w)));
-	o+=String.fromCharCode.apply(null, new Uint16Array(data.slice(l*w)));
-	return o;
-}
-
-function s2ab(s) {
-	var b = new ArrayBuffer(s.length*2), v = new Uint16Array(b);
-	for (var i=0; i != s.length; ++i) v[i] = s.charCodeAt(i);
-	return [v, b];
-}
-
-function xw_noxfer(data, cb) {
-	var worker = new Worker(XW.noxfer);
-	worker.onmessage = function(e) {
-		switch(e.data.t) {
-			case 'ready': break;
-			case 'e': console.error(e.data.d); break;
-			case XW.msg: cb(JSON.parse(e.data.d)); break;
-		}
-	};
-	var arr = rABS ? data : btoa(fixdata(data));
-	worker.postMessage({d:arr,b:rABS});
-}
-
-function xw_xfer(data, cb) {
-	var worker = new Worker(rABS ? XW.rABS : XW.norABS);
-	worker.onmessage = function(e) {
-		switch(e.data.t) {
-			case 'ready': break;
-			case 'e': console.error(e.data.d); break;
-			default: xx=ab2str(e.data).replace(/\n/g,"\\n").replace(/\r/g,"\\r"); cb(JSON.parse(xx)); break;
-		}
-	};
-	if(rABS) {
-		var val = s2ab(data);
-		worker.postMessage(val[1], [val[1]]);
-	} else {
-		worker.postMessage(data, [data]);
-	}
-}
-
-function xw(data, cb) {
-	transferable = document.getElementsByName("xferable")[0].checked;
-	if(transferable) xw_xfer(data, cb);
-	else xw_noxfer(data, cb);
-}
-
-function get_radio_value( radioName ) {
-	var radios = document.getElementsByName( radioName );
-	for( var i = 0; i < radios.length; i++ ) {
-		if( radios[i].checked || radios.length === 1 ) {
-			return radios[i].value;
-		}
-	}
-}
-
-function reset(){
-	warnings.value = "";
-	out.value="";
-}
-
-function to_json(workbook, warnings_callback) {
-    // export the content of the first worksheet to JSON
-	var result = X.utils.sheet_to_row_object_array(workbook.Sheets[workbook.SheetNames[0]], {'raw':true});
-    result.forEach(function(entry) {
-    	// check if the image filename is correctly referenced in img/photos directory.
-		var img = new Image();
-		img.src = "img/photos/"+entry.image;
-		img.onerror = function(){warnings_callback("Image '" + entry.image + "' could not be found in img/photos/ directory");}
-
-        entry.lat = Number(entry.lat);
-        if (entry.lat < -90 || entry.lat > 90) warnings_callback("Image '" + entry.image + "' has the latitude " +
-        	entry.lat +" out of the interval [-90, 90]");
-        entry.lng = Number(entry.lng);
-        if (entry.lng < -180 || entry.lng > 180) warnings_callback("Image '" + entry.image + "' has the longitude " +
-        	entry.lng +" out of the interval [-180, 180]");
-    });
-	return result;
-}
-
-
-function process_wb(wb) {
-	var warnings_callback = function(warnContent){
-		warnings.value += warnContent + "\n";
-	};
-
-	var output ='(function() {\n'+
-    '    window.getCoordList = function() {\n'+
-    '        return ' + JSON.stringify(to_json(wb, warnings_callback), 2, 2)+ ';\n'+
-    '    };\n'+
-    '})();';
-	out.value = output;
-	var coordinatesBlob = new Blob([output], {type: "text/plain;charset=utf-8"});
-    saveAs(coordinatesBlob, "coordinates.js");
-}
-
-var drop = document.getElementById('drop');
-function handleDrop(e) {
-	e.stopPropagation();
-	e.preventDefault();
-	rABS = document.getElementsByName("userabs")[0].checked;
-	use_worker = document.getElementsByName("useworker")[0].checked;
-	var files = e.dataTransfer.files;
-	var f = files[0];
-	{
-		var reader = new FileReader();
-		var name = f.name;
-		reader.onload = function(e) {
-			if(typeof console !== 'undefined') console.log("onload", new Date(), rABS, use_worker);
-			var data = e.target.result;
-			if(use_worker) {
-				xw(data, process_wb);
-			} else {
-				var wb;
-				if(rABS) {
-					wb = X.read(data, {type: 'binary'});
-				} else {
-				var arr = fixdata(data);
-					wb = X.read(btoa(arr), {type: 'base64'});
-				}
-				process_wb(wb);
-			}
-		};
-		if(rABS) reader.readAsBinaryString(f);
-		else reader.readAsArrayBuffer(f);
-	}
-}
-
-function handleDragover(e) {
-	e.stopPropagation();
-	e.preventDefault();
-	e.dataTransfer.dropEffect = 'copy';
-}
-
-if(drop.addEventListener) {
-	drop.addEventListener('dragenter', handleDragover, false);
-	drop.addEventListener('dragover', handleDragover, false);
-	drop.addEventListener('drop', handleDrop, false);
-}
-
-
-var xlf = document.getElementById('xlf');
-function handleFile(e) {
-	rABS = document.getElementsByName("userabs")[0].checked;
-	use_worker = document.getElementsByName("useworker")[0].checked;
-	var files = e.target.files;
-	var f = files[0];
-	{
-		var reader = new FileReader();
-		var name = f.name;
-		reader.onload = function(e) {
-			if(typeof console !== 'undefined') console.log("onload", new Date(), rABS, use_worker);
-			var data = e.target.result;
-			if(use_worker) {
-				xw(data, process_wb);
-			} else {
-				var wb;
-				if(rABS) {
-					wb = X.read(data, {type: 'binary'});
-				} else {
-				var arr = fixdata(data);
-					wb = X.read(btoa(arr), {type: 'base64'});
-				}
-				process_wb(wb);
-			}
-		};
-		if(rABS) reader.readAsBinaryString(f);
-		else reader.readAsArrayBuffer(f);
-	}
-	$(xlf).wrap('<form>').closest('form').get(0).reset();
-    $(xlf).unwrap();
-}
-
-if(xlf.addEventListener) xlf.addEventListener('change', handleFile, false);
-</script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=geometry"></script>
+<script src="js/coordinates-generator.js"></script>
 </body>
 </html>
